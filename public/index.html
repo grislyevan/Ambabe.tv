@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ambabe.tv — Karaoke Queue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Ambabe Karaoke!</h1>
+    <p class="subtitle">Add your name to the karaoke queue</p>
+
+    <div id="added-notice" class="added-notice" aria-live="polite">
+      You're on the list!
+    </div>
+
+    <form id="add-form" class="form-row">
+      <input type="text" id="name-input" placeholder="Your name" required maxlength="80" autocomplete="name">
+      <button type="submit" id="submit-btn">Add me</button>
+    </form>
+
+    <section class="queue-section" aria-label="Queue">
+      <h2>Up next</h2>
+      <ul id="queue-list" class="queue-list">
+        <li class="queue-empty">No one in the queue yet. Be the first!</li>
+      </ul>
+    </section>
+
+    <p class="host-link">Host? <a href="/host">Open host controls</a></p>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

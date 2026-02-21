@@ -1,0 +1,5 @@
+node_modules/
+queue.json
+.env
+.DS_Store
+Ambabe Karaoke.app

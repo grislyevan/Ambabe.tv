@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ambabe.tv — Host</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="host-header">
+      <h1>Ambabe Karaoke — Host</h1>
+      <span class="host-links">
+        <a href="/qr" class="back-link">QR code</a>
+        <a href="/" class="back-link">← Singer view</a>
+      </span>
+    </div>
+    <p class="subtitle">Reorder the queue or remove no-shows.</p>
+
+    <section class="queue-section" aria-label="Queue">
+      <h2>Queue</h2>
+      <ul id="queue-list" class="queue-list">
+        <li class="queue-empty">Queue is empty.</li>
+      </ul>
+    </section>
+  </div>
+  <script src="/host.js"></script>
+</body>
+</html>

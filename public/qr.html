@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ambabe Karaoke — QR code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .qr-page { text-align: center; padding: 2rem 1.5rem; }
+    .qr-page h1 { margin-bottom: 0.5rem; }
+    .qr-page .subtitle { margin-bottom: 1.5rem; }
+    #qrcode { display: inline-block; margin: 1rem 0; padding: 1rem; background: #fff; border-radius: 12px; }
+    .qr-url { font-size: 0.95rem; color: var(--muted); word-break: break-all; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container qr-page">
+    <h1>Ambabe Karaoke</h1>
+    <p class="subtitle">Scan to join the queue</p>
+    <div id="qrcode"></div>
+    <p class="qr-url" id="qr-url"></p>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    var singerUrl = window.location.origin + '/';
+    document.getElementById('qr-url').textContent = singerUrl;
+    new QRCode(document.getElementById('qrcode'), {
+      text: singerUrl,
+      width: 256,
+      height: 256
+    });
+  </script>
+</body>
+</html>
