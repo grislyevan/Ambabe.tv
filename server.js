@@ -16,23 +16,35 @@ const HOST_TOKEN = 'authenticated';
 
 // In-memory queue: [ { id, name, addedAt }, ... ]
 let queue = [];
+let currentlySingingId = null;
 
 function loadQueue() {
   try {
-    const data = fs.readFileSync(QUEUE_FILE, 'utf8');
-    queue = JSON.parse(data);
-    if (!Array.isArray(queue)) queue = [];
+    const data = JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf8'));
+    if (Array.isArray(data)) {
+      queue = data;
+      currentlySingingId = null;
+    } else {
+      queue = Array.isArray(data.queue) ? data.queue : [];
+      currentlySingingId = data.currentlySingingId && typeof data.currentlySingingId === 'string' ? data.currentlySingingId : null;
+    }
   } catch (_) {
     queue = [];
+    currentlySingingId = null;
   }
 }
 
 function saveQueue() {
   try {
-    fs.writeFileSync(QUEUE_FILE, JSON.stringify(queue, null, 2), 'utf8');
+    const out = { queue, currentlySingingId };
+    fs.writeFileSync(QUEUE_FILE, JSON.stringify(out, null, 2), 'utf8');
   } catch (err) {
     console.error('Failed to save queue:', err.message);
   }
+}
+
+function queueForClient() {
+  return queue.map((e) => ({ ...e, isCurrentlySinging: e.id === currentlySingingId }));
 }
 
 function generateId() {
@@ -118,7 +130,7 @@ const server = http.createServer(async (req, res) => {
 
   // API: GET /api/queue
   if (req.method === 'GET' && pathname === '/api/queue') {
-    sendJson(res, 200, queue);
+    sendJson(res, 200, queueForClient());
     return;
   }
 
@@ -133,7 +145,7 @@ const server = http.createServer(async (req, res) => {
     const entry = { id: generateId(), name, addedAt: Date.now() };
     queue.push(entry);
     saveQueue();
-    sendJson(res, 201, queue);
+    sendJson(res, 201, queueForClient());
     return;
   }
 
@@ -146,7 +158,42 @@ const server = http.createServer(async (req, res) => {
     const rest = queue.filter((e) => !byId.has(e.id) || !orderedIds.includes(e.id));
     queue = [...reordered, ...rest];
     saveQueue();
-    sendJson(res, 200, queue);
+    sendJson(res, 200, queueForClient());
+    return;
+  }
+
+  // API: PATCH /api/queue/currently-singing — body: { id: string | null }
+  if (req.method === 'PATCH' && pathname === '/api/queue/currently-singing') {
+    const body = await parseBody(req);
+    const id = body.id === null || body.id === undefined ? null : String(body.id).trim();
+    if (id !== null && !queue.some((e) => e.id === id)) {
+      sendJson(res, 404, { error: 'Singer not in queue' });
+      return;
+    }
+    currentlySingingId = id || null;
+    saveQueue();
+    sendJson(res, 200, queueForClient());
+    return;
+  }
+
+  // API: POST /api/queue/:id/move-to-bottom — mark sung, move to end (rotation)
+  if (req.method === 'POST' && pathname.endsWith('/move-to-bottom')) {
+    const base = pathname.slice(0, -'/move-to-bottom'.length);
+    const id = base.slice('/api/queue/'.length);
+    if (!id) {
+      sendJson(res, 400, { error: 'Id required' });
+      return;
+    }
+    const idx = queue.findIndex((e) => e.id === id);
+    if (idx === -1) {
+      sendJson(res, 404, { error: 'Not found' });
+      return;
+    }
+    const [entry] = queue.splice(idx, 1);
+    queue.push(entry);
+    if (currentlySingingId === id) currentlySingingId = null;
+    saveQueue();
+    sendJson(res, 200, queueForClient());
     return;
   }
 
@@ -163,8 +210,9 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 404, { error: 'Not found' });
       return;
     }
+    if (currentlySingingId === id) currentlySingingId = null;
     saveQueue();
-    sendJson(res, 200, queue);
+    sendJson(res, 200, queueForClient());
     return;
   }
 

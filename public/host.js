@@ -49,6 +49,34 @@
       });
   }
 
+  function setCurrentlySinging(id) {
+    fetch('/api/queue/currently-singing', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id }),
+    })
+      .then(function (res) {
+        return res.ok ? res.json() : res.json().then(Promise.reject);
+      })
+      .then(renderQueue)
+      .catch(function () {
+        alert('Failed to update. Try again.');
+      });
+  }
+
+  function moveToBottom(id) {
+    fetch('/api/queue/' + encodeURIComponent(id) + '/move-to-bottom', {
+      method: 'POST',
+    })
+      .then(function (res) {
+        return res.ok ? res.json() : res.json().then(Promise.reject);
+      })
+      .then(renderQueue)
+      .catch(function () {
+        alert('Failed to update. Try again.');
+      });
+  }
+
   function renderQueue(list) {
     entries = Array.isArray(list) ? list : entries;
     if (!entries.length) {
@@ -60,17 +88,23 @@
       .map(function (e, i) {
         var upDisabled = i === 0 ? ' disabled' : '';
         var downDisabled = i === entries.length - 1 ? ' disabled' : '';
+        var nowClass = e.isCurrentlySinging ? ' now-singing' : '';
         return (
           '<li data-id="' +
           escapeHtml(e.id) +
+          '" class="' +
+          nowClass +
           '">' +
           '<span class="position">' +
           (i + 1) +
           '</span>' +
           '<span class="name">' +
           escapeHtml(e.name) +
+          (e.isCurrentlySinging ? ' <span class="now-badge">Now singing</span>' : '') +
           '</span>' +
           '<span class="host-actions">' +
+          '<button type="button" class="btn-now secondary" data-action="now" aria-label="Mark as now singing">Now</button>' +
+          '<button type="button" class="btn-done secondary" data-action="done" aria-label="Done, move to bottom">Done</button>' +
           '<button type="button" class="move-btn secondary" data-action="up" aria-label="Move up"' +
           upDisabled +
           '>↑</button>' +
@@ -82,6 +116,20 @@
         );
       })
       .join('');
+
+    queueList.querySelectorAll('[data-action="now"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('li').getAttribute('data-id');
+        setCurrentlySinging(id);
+      });
+    });
+
+    queueList.querySelectorAll('[data-action="done"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('li').getAttribute('data-id');
+        moveToBottom(id);
+      });
+    });
 
     queueList.querySelectorAll('[data-action="up"]').forEach(function (btn) {
       btn.addEventListener('click', function () {

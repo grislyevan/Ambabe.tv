@@ -19,10 +19,11 @@
     queueList.innerHTML = entries
       .map(
         (e, i) =>
-          '<li><span class="position" aria-hidden="true">' +
-          (i + 1) +
-          '</span><span class="name">' +
+          '<li>' +
+          '<span class="position" aria-hidden="true">' + (i + 1) + '</span>' +
+          '<span class="name">' +
           escapeHtml(e.name) +
+          (e.isCurrentlySinging ? ' <span class="now-badge">Now singing</span>' : '') +
           '</span></li>'
       )
       .join('');
